@@ -1,0 +1,7 @@
+#!/bin/bash
+#Purge all volumes to start from scratch
+./stop
+rm -R ilias/iliasdata ilias/mysql ilias/www_data mattermost-docker/volumes openmeetings/data
+rm ilias/.ilias_env ilias/.mysql_env openmeetings/.env
+mkdir -p ./mattermost-docker/volumes/app/mattermost/{data,logs,config,plugins}
+chown -R 2000:2000 ./mattermost-docker/volumes/app/mattermost/

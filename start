@@ -1,0 +1,4 @@
+#!/bin/bash
+docker-compose -f ilias/docker-compose.yml up -d
+docker-compose -f mattermost-docker/docker-compose.yml up -d
+docker-compose -f openmeetings/docker-compose.yml up -d

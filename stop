@@ -1,0 +1,4 @@
+#!/bin/bash
+docker-compose -f ilias/docker-compose.yml down
+docker-compose -f mattermost-docker/docker-compose.yml down
+docker-compose -f openmeetings/docker-compose.yml down

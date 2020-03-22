@@ -1,0 +1,108 @@
+#!/usr/bin/python3
+import shutil
+import os
+import math
+import string
+import random
+r = random.SystemRandom()
+
+
+def generate_password(pass_len=20):
+    """Generates a password with the given length (see https://stackoverflow.com/questions/3854692/generate-password-in-python)
+    """
+    symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklymnopqrstuvwxyz0123456789:@.,/+-!='
+    return ''.join(r.choice(symbols) for _ in range(pass_len))
+
+
+def replace_in_file(src_file_name, dest_file_name, replace_patterns):
+    """Replaces the patterns from the list in the given src file and outputs the result to dest_file_name
+    """
+    fin = open(src_file_name, "rt")
+    fout = open(dest_file_name, "wt")
+
+    for line in fin:
+        for key_value_dict in replace_patterns:
+            line = line.replace(
+                key_value_dict['key'], key_value_dict['value'])
+        fout.write(line)
+
+    fin.close()
+    fout.close()
+
+
+def generate_ilias_configuration(ilias_hostname):
+    print('Ilias configuration is being generated')
+    ilias_database_variable = '$$ILIAS_DB_PASSWORD$$'
+    ilias_hostname_variable = '$$ILIAS_HOST_NAME$$'
+    ilias_env_template = 'ilias/ilias_env_template'
+    ilias_env = 'ilias/.ilias_env'
+    mysql_env_template = 'ilias/mysql_env_template'
+    mysql_env = 'ilias/.mysql_env'
+
+    mysql_password = generate_password(20)
+    replace_patterns = [
+        {'key': ilias_database_variable, 'value': mysql_password},
+        {'key': ilias_hostname_variable, 'value': ilias_hostname}
+    ]
+
+    replace_in_file(ilias_env_template, ilias_env, replace_patterns)
+    replace_in_file(mysql_env_template, mysql_env, replace_patterns)
+
+    print('Mysql root password was generated:"' +
+          mysql_password + '" and configured for Ilias. You should write it down safely.')
+    print('Ilias configuration ready')
+
+
+def generate_openmeetings_configuration(openmeetings_domain):
+    print('OpenMeetings configuration is being generated')
+    openmeetings_database_variable = '$$OPENMEETINGS_DB_PASSWORD$$'
+    openmeetings_env_template = 'openmeetings/env_template'
+    openmeetings_env = 'openmeetings/.env'
+
+    postgresql_password = generate_password(20)
+    replace_patterns = [
+        {'key': openmeetings_database_variable, 'value': postgresql_password}]
+    replace_in_file(openmeetings_env_template,
+                    openmeetings_env, replace_patterns)
+
+    print('Postgresql root password was generated:"' +
+          postgresql_password + '" and configured for OpenMeetings. You should write it down safely.')
+
+    print('OpenMeetings configuration ready')
+
+
+def generate_mattermost_configuration(mattermost_domain):
+    print('Mattermost configuration is being generated')
+    
+
+    print('Mattermost configuration ready')
+
+
+def generate_configuration(ilias_domain, openmeetings_domain, mattermost_domain):
+    print('Configuration Script for eLearning Blueprint started')
+
+    generate_ilias_configuration(ilias_domain)
+    generate_openmeetings_configuration(openmeetings_domain)
+    generate_mattermost_configuration(mattermost_domain)
+
+    print('Configuration ended')
+
+
+if __name__ == "__main__":
+    print('Enter Ilias hostname (for example ilias.example.com):')
+    ilias_domain = input()
+    print('Enter Openmeetings hostname (for example openmeetings.example.com):')
+    openmeetings_domain = input()
+    print('Enter Mattermost hostname (for example mattermost.example.com):')
+    mattermost_domain = input()
+
+    print('Configuration will run for the following domains:')
+    print('Ilias: ' + ilias_domain)
+    print('Openmeetings: ' + openmeetings_domain)
+    print('Mattermost: ' + mattermost_domain)
+    print('Is that correct? (Y/N)')
+    answer = input()
+    if answer is not None and answer.strip().upper() == 'Y':
+        generate_configuration(ilias_domain, openmeetings_domain, mattermost_domain)
+    else:
+        print('You cancelled. Please try again.')

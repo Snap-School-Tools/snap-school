@@ -1,0 +1,21 @@
+version: '3'
+services:
+    ilias:
+        image: sturai/ilias
+        ports:
+          - 8300:80
+        links:
+          - mysql
+        env_file: .ilias_env
+        volumes:
+          - ./www_data:/var/www/html/data
+          - ./iliasdata:/var/iliasdata/ilias
+    mysql:
+        image: mysql:5.7
+        command: |
+            --character-set-server=utf8
+            --collation-server=utf8_general_ci
+        env_file: .mysql_env
+        volumes:
+          - ./mysql:/var/lib/mysql
+
