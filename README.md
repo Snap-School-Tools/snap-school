@@ -87,7 +87,7 @@ Soll das Anfragen der Zertifikate nur getestet werden, kann in nginx/nginx_proxy
 
 Dadurch wird die Staging Umgebung von Letsencrypt verwendet. Root- und Intermediate-Zertifikat werden damit von Browsern nicht akzeptiert. Wird benötigt, da nach zu häufigen Anfragen letsencrypt den Anfrager für einige Zeit sperrt. Solange das nicht gemacht wird, werden echte Zertifikate angefordert und konfiguriert.
 
-## Installation
+## Konfiguration des Blueprints
 
 ```bash
 cd /srv
