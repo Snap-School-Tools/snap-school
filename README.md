@@ -361,6 +361,7 @@ Unpausing ilias-schule-3exampleorg_mysql_1 ... done
 Dieses Projekt setzt folgende Open Source Software-Komponenten ein bzw. ermöglicht ihre Nutzung:
 
 * [Ilias - eLearning Plattform](https://www.ilias.de/)
+* [Ilias Docker Image der studer + raimann ag](https://github.com/studer-raimann/docker-ilias)
 * [nginx-proxy - nginx reverse proxy für Docker Container](https://github.com/nginx-proxy/nginx-proxy)
 * [letsencrypt-nginx-proxy-companion - leichtgewichtiger companion container für nginx-proxy um mithilfe von Letsencrypt Zertifikate zu generieren](https://github.com/nginx-proxy/docker-letsencrypt-nginx-proxy-companion/)
 * [Gist des Github Users "pirate" (Nick Sweeting) um ein docker-compose Projekt zu sichern](https://gist.github.com/pirate/265e19a8a768a48cf12834ec87fb0eed)
