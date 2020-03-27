@@ -1,0 +1,20 @@
+#!/bin/bash
+
+read -p "The following operation will update all container images defined in docker-compose files of the projects. You should backup or create a VM snapshot before doing that. Do you want to start? (Y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+
+    echo "Pulling nginx images..."
+    docker-compose --file nginx/docker-compose.yml pull
+
+    echo "Pulling ilias images (you can ignore warning messages that variables are not set)..."
+    docker-compose --file ilias/docker-compose.yml pull
+
+    echo "Recreating containers..."
+    ./start
+
+    echo "Updated successfully"
+else
+    echo "Operation was stopped. Nothing happened"
+fi

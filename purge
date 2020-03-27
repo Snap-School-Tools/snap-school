@@ -1,7 +1,26 @@
 #!/bin/bash
-#Purge all volumes to start from scratch
-./stop
-rm -R ilias/iliasdata ilias/mysql ilias/www_data mattermost-docker/volumes openmeetings/data
-rm ilias/.ilias_env ilias/.mysql_env openmeetings/.env
-mkdir -p ./mattermost-docker/volumes/app/mattermost/{data,logs,config,plugins}
-chown -R 2000:2000 ./mattermost-docker/volumes/app/mattermost/
+# Purge all docker data to start from scratch
+read -p "The following operation will purge your docker system to start from scratch (can include data from other docker projects, if no references exist anymore). Do you know what you do and want to start from scratch? (Y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    ./stop
+
+    # Delete Ilias environment files
+    for f in ilias/.ilias_env*
+    do
+        rm $f
+        echo "Deleted $f"
+    done
+
+    # Delete nginx environment files
+    rm nginx/.nginx_proxy_env
+    echo "Deleted nginx/.nginx_proxy_env"
+
+    # Purge docker data
+    docker system prune -f
+    docker volume prune -f
+    docker network rm elearning
+else
+    echo "You stopped the operation, nothing changed."
+fi

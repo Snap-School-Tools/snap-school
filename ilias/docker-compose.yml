@@ -1,21 +1,36 @@
 version: '3'
 services:
-    ilias:
-        image: sturai/ilias
-        ports:
-          - 8300:80
-        links:
-          - mysql
-        env_file: .ilias_env
-        volumes:
-          - ./www_data:/var/www/html/data
-          - ./iliasdata:/var/iliasdata/ilias
-    mysql:
-        image: mysql:5.7
-        command: |
-            --character-set-server=utf8
-            --collation-server=utf8_general_ci
-        env_file: .mysql_env
-        volumes:
-          - ./mysql:/var/lib/mysql
-
+  ilias:
+      image: sturai/ilias
+      expose:
+        - 80
+      links:
+        - mysql
+      volumes:
+        - ilias_www:/var/www/html/data
+        - ilias_data:/var/iliasdata/ilias
+      environment:
+        - ILIAS_AUTO_SETUP=${ILIAS_AUTO_SETUP}
+        - ILIAS_DB_USER=${ILIAS_DB_USER}
+        - ILIAS_DB_PASSWORD=${ILIAS_DB_PASSWORD}
+        - ILIAS_HOST_NAME=${ILIAS_HOST_NAME}
+        - VIRTUAL_HOST=${VIRTUAL_HOST}
+        - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+  mysql:
+      image: mysql:5.7
+      command: |
+          --character-set-server=utf8
+          --collation-server=utf8_general_ci
+      volumes:
+        - ilias_mysql:/var/lib/mysql
+      environment:
+          - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+          - MYSQL_DATABASE=${MYSQL_DATABASE}
+volumes:
+  ilias_www:
+  ilias_data:
+  ilias_mysql:
+networks:
+  default:
+    external:
+        name: elearning
