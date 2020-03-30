@@ -5,16 +5,16 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
 
-    echo "Pulling nginx images..."
+    echo "[*] Pulling nginx images..."
     docker-compose --file nginx/docker-compose.yml pull
 
-    echo "Pulling ilias images (you can ignore warning messages that variables are not set)..."
+    echo "[*] Pulling ilias images (you can ignore warning messages that variables are not set)..."
     docker-compose --file ilias/docker-compose.yml pull
 
-    echo "Recreating containers..."
+    echo "[*] Recreating containers..."
     ./start
 
-    echo "Updated successfully"
+    echo "[✓] Updated successfully"
 else
-    echo "Operation was stopped. Nothing happened"
+    echo "[✗] Operation was stopped. Nothing happened"
 fi

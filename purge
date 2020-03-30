@@ -10,17 +10,19 @@ then
     for f in ilias/env*
     do
         rm $f
-        echo "Deleted $f"
+        echo "[*] Deleted $f"
     done
 
     # Delete nginx environment files
     rm nginx/.nginx_proxy_env
-    echo "Deleted nginx/.nginx_proxy_env"
+    echo "[*] Deleted nginx/.nginx_proxy_env"
 
     # Purge docker data
     docker system prune -f
     docker volume prune -f
     docker network rm elearning
+
+    echo "[✓] Purge operation complete."
 else
-    echo "You stopped the operation, nothing changed."
+    echo "[✗] Purge operation stopped, nothing changed."
 fi

@@ -1,28 +1,31 @@
 #!/bin/bash
 
+echo "Starting hosted blue print..."
 # Check docker network and create, if not exists
-echo "Creating elearning docker network"
+echo "[*] Creating elearning docker network"
 docker network inspect elearning >/dev/null 2>&1 || \
     docker network create --driver bridge elearning
 
-echo "Starting Nginx reverse proxy..."
+echo "[*] Starting Nginx reverse proxy..."
 
 docker-compose --file nginx/docker-compose.yml up -d
 
-echo "Waiting Nginx to launch on Port 80..."
+echo "[*] Waiting Nginx to launch on Port 80..."
 
 while ! nc -z localhost 80; do   
   sleep 0.1
 done
 
 
-echo "Nginx launched"
+echo "[✓] Nginx launched"
 
 for f in ilias/env*
 do
-    echo Starting docker image with env file: $f
+    echo "[*] Starting docker image with env file: $f"
     docker-compose --env-file $f --file ilias/docker-compose.yml up -d
 done
+
+echo "[✓] All containers in the environment started successfully."
 
 #docker-compose -f mattermost-docker/docker-compose.yml up -d
 #docker-compose -f openmeetings/docker-compose.yml up -d

@@ -116,8 +116,9 @@ def request_configuration():
     if answer is not None and answer.strip().upper() == 'Y':
         generate_nginx_configuration(admin_email)
         generate_ilias_configuration(ilias_domains, client)
+        print('[✓] Configuration finished successfully')
     else:
-        print('You cancelled. Please try again.')
+        print('[✗] You cancelled. Please try again.')
 
 
 if __name__ == "__main__":
