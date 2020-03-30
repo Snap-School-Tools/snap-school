@@ -1,7 +1,7 @@
 version: '3'
 services:
   ilias:
-      image: digitallearningforschools/ilias-school:ilias-school-template-test
+      image: digitallearningforschools/ilias-school:5.4
       expose:
         - 80
       links:

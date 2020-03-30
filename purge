@@ -20,7 +20,6 @@ then
     # Purge docker data
     docker system prune -f
     docker volume prune -f
-    docker network rm elearning
 
     echo "[✓] Purge operation complete."
 else
