@@ -6,7 +6,7 @@ docker-compose --file nginx/docker-compose.yml down
 
 echo "Stopping Ilias instances..."
 
-for f in ilias/.ilias_env*
+for f in ilias/env*
 do
     echo "Stopping docker multi-container with env-file $f"
     docker-compose --env-file $f --file ilias/docker-compose.yml down

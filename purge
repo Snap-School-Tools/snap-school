@@ -7,7 +7,7 @@ then
     ./stop
 
     # Delete Ilias environment files
-    for f in ilias/.ilias_env*
+    for f in ilias/env*
     do
         rm $f
         echo "Deleted $f"

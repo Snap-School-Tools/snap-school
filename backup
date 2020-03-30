@@ -72,7 +72,7 @@ backup() {
 }
 
 backup "nginx"
-for f in ilias/.ilias_env*
+for f in ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"
     backup "ilias" "--env-file $(basename $f)" "$(basename $f)"
