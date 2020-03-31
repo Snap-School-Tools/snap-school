@@ -1,3 +1,4 @@
+![#wirvsvirus Logo](ressources/wirvsvirus-logo.png)
 # Hosted Blueprint für Digital Learning für Schüler
 ## Allgemeine Informationen
 Dieser Blueprint entstand im Rahmen des #wirvsvirus Hackathons in der Gruppe #1_241_a_digitallearningfürschüler. Zielstellung ist aufzuzeigen, wie aus dem Free and Open Source Umfeld selbst gehostete Lösungen im Bildungsumfeld sofort genutzt werden könnten.
