@@ -1,7 +1,7 @@
 version: '3'
 services:
   ilias:
-      image: sturai/ilias
+      image: digitallearningforschools/ilias-school:5.4
       expose:
         - 80
       links:
@@ -14,6 +14,10 @@ services:
         - ILIAS_DB_USER=${ILIAS_DB_USER}
         - ILIAS_DB_PASSWORD=${ILIAS_DB_PASSWORD}
         - ILIAS_HOST_NAME=${ILIAS_HOST_NAME}
+        - ILIAS_CLIENT_NAME=${ILIAS_CLIENT_NAME}
+        - ILIAS_DB_DUMP=${ILIAS_DB_DUMP}
+        - ILIAS_DEFAULT_SKIN=${ILIAS_DEFAULT_SKIN}
+        - ILIAS_DEFAULT_STYLE=${ILIAS_DEFAULT_STYLE}
         - VIRTUAL_HOST=${VIRTUAL_HOST}
         - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
   mysql:

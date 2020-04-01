@@ -64,7 +64,7 @@ backup() {
     echo "[*] Compressing backup folder to $backup_dir.tar.gz"
     tar -zcf "$backup_dir.tar.gz" --totals "$backup_dir" && rm -Rf "$backup_dir"
 
-    echo "[√] Finished Backing up $project_name to $backup_dir.tar.gz."
+    echo "[✓] Finished Backing up $project_name to $backup_dir.tar.gz."
 
     # Resume the containers if paused above
     docker-compose $env_file_param unpause
@@ -72,7 +72,7 @@ backup() {
 }
 
 backup "nginx"
-for f in ilias/.ilias_env*
+for f in ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"
     backup "ilias" "--env-file $(basename $f)" "$(basename $f)"

@@ -11,7 +11,6 @@ r = random.SystemRandom()
 def generate_password(pass_len=20):
     """Generates a password with the given length (see https://stackoverflow.com/questions/3854692/generate-password-in-python)
     """
-    #TODO Generating more complex passwords for MySQL is currently not working
     symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklymnopqrstuvwxyz0123456789'
     return ''.join(r.choice(symbols) for _ in range(pass_len))
 
@@ -47,35 +46,58 @@ def generate_nginx_configuration(email):
     print('Nginx-proxy configuration ready')
 
 
-def generate_ilias_configuration(ilias_hostnames):
+def generate_ilias_configuration(ilias_hostnames, client):
     print('Ilias configuration is being generated')
+    ilias_env_template = 'ilias/ilias_env_template'
     ilias_database_variable = '$$ILIAS_DB_PASSWORD$$'
     ilias_hostname_variable = '$$ILIAS_HOST_NAME$$'
-    ilias_env_template = 'ilias/ilias_env_template'
+    ilias_client_name_variable = '$$ILIAS_CLIENT_NAME$$'
+    ilias_db_dump_variable = '$$ILIAS_DB_DUMP$$'
+    ilias_default_skin_variable = '$$ILIAS_DEFAULT_SKIN$$'
+    ilias_default_style_variable = '$$ILIAS_DEFAULT_STYLE$$'
+
+    db_dump = 'setup/sql/ilias3.sql'
+    ilias_skin = 'default'
+    ilias_style = 'delos'
+
+    if client == 'school':
+        db_dump = '/opt/sctemp/coronapub1.sql'
+        ilias_skin = 'Skin_ILIAS-54_CoronaSupport'
+        ilias_style = 'Skin_ILIAS-5.4_CoronaSupport'
 
     for ilias_hostname in ilias_hostnames:
-        ilias_env = 'ilias/.ilias_env_' + ilias_hostname
+        ilias_env = 'ilias/env_' + ilias_hostname
 
         mysql_password = generate_password(20)
         replace_patterns = [
             {'key': ilias_database_variable, 'value': mysql_password},
-            {'key': ilias_hostname_variable, 'value': ilias_hostname}
+            {'key': ilias_hostname_variable, 'value': ilias_hostname},
+            {'key': ilias_client_name_variable, 'value': client},
+            {'key': ilias_db_dump_variable, 'value': db_dump},
+            {'key': ilias_default_skin_variable, 'value': ilias_skin},
+            {'key': ilias_default_style_variable, 'value': ilias_style}
         ]
 
         replace_in_file(ilias_env_template, ilias_env, replace_patterns)
 
         print(ilias_hostname + ' Mysql root password: "' + mysql_password + '"')
-    print('Ilias configuration ready.')
+    print('ILIAS configuration ready.')
+
 
 def request_configuration():
     """Allows the administrator to define necessary configuration options to start the elearning environment
     """
-    admin_email = None
     print('Enter an email address that will be used for letsencrypt (will receive warnings if certificates expire)')
     admin_email = input()
 
+    client = 'default'
+    print('Enter the client you want to activate during installation (default/school)')
+    client_choice = input()
+    if client_choice.lower() == 'school':
+        client = 'school'
+
     ilias_domains = []
-    print('Enter all Ilias instance\'s hostnames (one host name per line, for example ilias.my-school.com, ilias.my-school.provider.com, etc.)')
+    print('Enter all ILIAS instance\'s hostnames (one host name per line, for example ilias.my-school.com, ilias.my-school.provider.com, etc.)')
     for ilias_domain in sys.stdin:
         if ilias_domain == '\n':
             break
@@ -84,17 +106,20 @@ def request_configuration():
     print(ilias_domains)
 
     print('Admin email: ' + admin_email)
+    print('ILIAS client: ' + client)
     print('Configuration will be generated for the following domains:')
-    print('Ilias:')
+    print('ILIAS:')
     print(ilias_domains)
 
     print('Is that correct? (Y/N)')
     answer = input()
     if answer is not None and answer.strip().upper() == 'Y':
         generate_nginx_configuration(admin_email)
-        generate_ilias_configuration(ilias_domains)
+        generate_ilias_configuration(ilias_domains, client)
+        print('[✓] Configuration finished successfully')
     else:
-        print('You cancelled. Please try again.')
+        print('[✗] You cancelled. Please try again.')
+
 
 if __name__ == "__main__":
     request_configuration()

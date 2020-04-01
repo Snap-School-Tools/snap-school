@@ -1,16 +1,18 @@
 #!/bin/bash
 
-echo "Stopping Nginx reverse proxy..."
+echo "[*] Stopping Nginx reverse proxy..."
 
 docker-compose --file nginx/docker-compose.yml down
 
-echo "Stopping Ilias instances..."
+echo "[*] Stopping Ilias instances..."
 
-for f in ilias/.ilias_env*
+for f in ilias/env*
 do
-    echo "Stopping docker multi-container with env-file $f"
+    echo "[*] Stopping docker multi-container with env-file $f"
     docker-compose --env-file $f --file ilias/docker-compose.yml down
 done
+
+echo "[✓] All containers in the environment stopped successfully."
 
 #docker-compose -f mattermost-docker/docker-compose.yml down
 #docker-compose -f openmeetings/docker-compose.yml down
