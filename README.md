@@ -98,6 +98,28 @@ cd hosted-blueprint
 echo "PATH=$PATH:." >> ~/.bashrc
 source ~/.bashrc # Alternativ aus- und wieder einloggen
 bpctl -h # Hilfe für das Skript anzeigen
+usage: bpctl [-h] {configure,start,stop,update,backup,purge} ...
+
+Control script to control the digital learning environment
+
+positional arguments:
+  {configure,start,stop,update,backup,purge}
+    configure           Configures the environment. Configure tools to use and
+                        (sub) domains to install them on.
+    start               Starts all docker containers
+    stop                Stops all docker containers
+    update              Updates all docker images and recreates changed
+                        containers
+    backup              Creates backups of all docker volumes and recreates
+                        changed containers. Will pause containers during
+                        backup operation.
+    purge               Purges configuration, images, volumes but not backups
+                        of the complete environment. Purge operation can
+                        include other docker data that is not referenced
+                        anymore (calls docker system prune)
+
+optional arguments:
+  -h, --help            show this help message and exit
 ```
 
 ## Konfiguration des Blueprints
