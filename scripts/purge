@@ -8,7 +8,7 @@ read -p "The following operation will purge your docker system to start from scr
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    ./stop
+    $DIR/stop
 
     # Delete Ilias environment files
     for f in $DIR/../ilias/env*

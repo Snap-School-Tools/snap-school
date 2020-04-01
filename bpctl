@@ -3,6 +3,7 @@ import argparse
 import sys
 import subprocess
 import os
+import traceback
 
 from enum import Enum
 
@@ -54,6 +55,10 @@ def purge(args):
     subprocess.call(DIR_PATH + '/scripts/purge')
 
 
+def check_config_exists():
+    return os.path.exists(DIR_PATH + '/nginx/.nginx_proxy_env')
+
+
 if __name__ == '__main__':
     parser = HelpOnErrorParser(
         description='Control script to control the digital learning environment')
@@ -100,4 +105,23 @@ if __name__ == '__main__':
               file=sys.stderr)
         parser.print_help(sys.stderr)
     else:
-        args.func(args)
+        try:
+            if args.func != configure:
+                if check_config_exists():
+                    args.func(args)
+                else:
+                    print("[✗] Please call 'bpctl configure' before calling "
+                          "operations for the eLearning blueprint")
+            else:
+                if check_config_exists():
+                    print("[✗] eLearning blueprint has already been configured. Call 'bpctl purge' before calling "
+                          "'bpctl configure' again.")
+                else:
+                    args.func(args)
+        except KeyboardInterrupt:
+            print('\nThe process was stopped manually by key interrupt',
+                  file=sys.stderr)
+        except BaseException as e:
+            print('\nThe process was stopped by the following error: {0}'.format(
+                sys.exc_info()[0]), file=sys.stderr)
+            traceback.print_exc()

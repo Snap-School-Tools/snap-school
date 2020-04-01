@@ -2,7 +2,7 @@
 # Current script's directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-echo "Starting hosted blue print..."
+echo "Starting eLearning blueprint..."
 # Check docker network and create, if not exists
 echo "[*] Creating elearning docker network"
 docker network inspect elearning >/dev/null 2>&1 || \
