@@ -1,8 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Based on Docker gist https://gist.github.com/pirate/265e19a8a768a48cf12834ec87fb0eed of Github User "pirate" (Nick Sweeting)
 
-# Fully backup a docker-compose project, including all images, named and unnamed volumes, container filesystems, config, logs, and databases. 
+# Current script's directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# Fully backup a docker-compose project, including all images, named and unnamed volumes, container filesystems, config, logs, and databases. 
 backup() {
     project_dir=$1
     env_file_param=$2
@@ -71,8 +73,8 @@ backup() {
     cd ..
 }
 
-backup "nginx"
-for f in ilias/env*
+backup "$DIR/../nginx"
+for f in $DIR/../ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"
     backup "ilias" "--env-file $(basename $f)" "$(basename $f)"
