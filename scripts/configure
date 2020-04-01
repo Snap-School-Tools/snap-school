@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import shutil
 import os
 import math
@@ -7,6 +7,7 @@ import random
 import sys
 r = random.SystemRandom()
 
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def generate_password(pass_len=20):
     """Generates a password with the given length (see https://stackoverflow.com/questions/3854692/generate-password-in-python)
@@ -36,8 +37,8 @@ def generate_nginx_configuration(email):
     """
     print('Nginx-proxy configuration is being generated')
     nginx_email_variable = '$$EMAIL$$'
-    nginx_env_template = 'nginx/nginx_proxy_env_template'
-    nginx_env = 'nginx/.nginx_proxy_env'
+    nginx_env_template = DIR_PATH + '/../nginx/nginx_proxy_env_template'
+    nginx_env = DIR_PATH + '/../nginx/.nginx_proxy_env'
 
     replace_patterns = [
         {'key': nginx_email_variable, 'value': email},
@@ -48,7 +49,7 @@ def generate_nginx_configuration(email):
 
 def generate_ilias_configuration(ilias_hostnames, client):
     print('Ilias configuration is being generated')
-    ilias_env_template = 'ilias/ilias_env_template'
+    ilias_env_template = DIR_PATH + '/../ilias/ilias_env_template'
     ilias_database_variable = '$$ILIAS_DB_PASSWORD$$'
     ilias_hostname_variable = '$$ILIAS_HOST_NAME$$'
     ilias_client_name_variable = '$$ILIAS_CLIENT_NAME$$'
@@ -66,7 +67,7 @@ def generate_ilias_configuration(ilias_hostnames, client):
         ilias_style = 'Skin_ILIAS-5.4_CoronaSupport'
 
     for ilias_hostname in ilias_hostnames:
-        ilias_env = 'ilias/env_' + ilias_hostname
+        ilias_env = DIR_PATH + '/../ilias/env_' + ilias_hostname
 
         mysql_password = generate_password(20)
         replace_patterns = [
@@ -80,7 +81,6 @@ def generate_ilias_configuration(ilias_hostnames, client):
 
         replace_in_file(ilias_env_template, ilias_env, replace_patterns)
 
-        print(ilias_hostname + ' Mysql root password: "' + mysql_password + '"')
     print('ILIAS configuration ready.')
 
 

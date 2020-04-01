@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+import argparse
+import sys
+import subprocess
+import os 
+
+from enum import Enum
+
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+
+class HelpOnErrorParser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('error: %s\n' % message)
+        self.print_help()
+        sys.exit(2)
+
+
+class Operation(Enum):
+    """Enum containing all possible operations to call using bpctl
+    """
+    configure = 'configure'
+    start = 'start'
+    stop = 'stop'
+    update = 'update'
+    backup = 'backup'
+    purge = 'purge'
+
+    def __str__(self):
+        return self.value
+
+def configure(args):
+    subprocess.call(DIR_PATH + '/scripts/configure')
+
+def start(args):
+    subprocess.call(DIR_PATH + '/scripts/start')
+
+def stop(args):
+    subprocess.call(DIR_PATH + '/scripts/stop')
+
+def update(args):
+    subprocess.call(DIR_PATH + '/scripts/update')
+
+def backup(args):
+    subprocess.call(DIR_PATH + '/scripts/backup')
+
+def purge(args):
+    subprocess.call(DIR_PATH + '/scripts/purge')
+
+if __name__ == '__main__':
+    parser = HelpOnErrorParser(prog='Digital Learning for Students - Hosted Blueprint Control script',
+                               description='Control script to control the environment')
+    subparsers = parser.add_subparsers()
+    configure_parser = subparsers.add_parser(
+        str(Operation.configure), help='Configures the environment. Configure tools to use and (sub) domains to install them on.')
+    configure_parser.set_defaults(func=configure)
+
+    start_parser = subparsers.add_parser(
+        str(Operation.start), help='Starts all docker containers')
+    start_parser.set_defaults(func=start)
+
+    stop_parser = subparsers.add_parser(
+        str(Operation.stop), help='Stops all docker containers')
+    stop_parser.set_defaults(func=stop)
+
+    update_parser = subparsers.add_parser(
+        str(Operation.update), help='Updates all docker images and recreates changed containers')
+    update_parser.set_defaults(func=update)
+
+    backup_parser = subparsers.add_parser(
+        str(Operation.backup),
+        help=('Creates backups of all docker volumes and recreates changed containers. '
+              'Will pause containers during backup operation.'))
+    backup_parser.set_defaults(func=backup)
+
+    purge_parser = subparsers.add_parser(
+        str(Operation.purge), help=('Purges configuration, images, volumes but not backups of the complete environment. '
+                                    'Purge operation can include other docker data that is not referenced anymore (calls docker system prune)'))
+    purge_parser.set_defaults(func=purge)
+
+    args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        print('\nCalled bpctl without operation. Printing help message.\n', file=sys.stderr)
+        parser.print_help(sys.stderr)
+    else:
+        args.func(args)

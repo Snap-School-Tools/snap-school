@@ -1,4 +1,4 @@
-![#wirvsvirus Logo](ressources/wirvsvirus-logo.png)
+![#wirvsvirus Logo](resources/wirvsvirus-logo.png)
 # Hosted Blueprint für Digital Learning für Schüler
 ## Allgemeine Informationen
 Dieser Blueprint entstand im Rahmen des #wirvsvirus Hackathons in der Gruppe #1_241_a_digitallearningfürschüler. Zielstellung ist aufzuzeigen, wie aus dem Free and Open Source Umfeld selbst gehostete Lösungen im Bildungsumfeld sofort genutzt werden könnten.
@@ -73,7 +73,6 @@ systemctl disable nginx
 systemctl stop nginx
 systemctl disable apache2
 systemctl stop apache2
-
 ```
 
 ## Reverse Proxy und SSL-Zertifikate (https)
@@ -88,14 +87,24 @@ Soll das Anfragen der Zertifikate nur getestet werden, kann in `nginx/nginx_prox
 
 Dadurch wird die Staging Umgebung von Letsencrypt verwendet. Root- und Intermediate-Zertifikat werden damit von Browsern nicht akzeptiert. Wird während Tests benötigt, da nach zu häufigen Anfragen letsencrypt den Anfrager für einige Zeit sperrt. Solange das nicht gemacht wird, werden echte Zertifikate angefordert und konfiguriert.
 
-## Konfiguration des Blueprints
+## Installation des Blueprints
 Die im Folgenden dargestellten Schritte müssen mit einem für Docker berechtigten User durchgeführt werden. Getestet wurden sie mit Root-User.
 
 ```bash
 cd /srv #Dieses Verzeichnis kann frei gewählt werden und ist nur ein Vorschlag (bitte Befehle entsprechend anpassen, wenn in ein anderes Verzeichnis installiert wird)
 git clone https://github.com/Digital-Learning-fur-Schuler/hosted-blueprint.git
 cd hosted-blueprint
-./configure
+# Pfad zur PATH-Variable hinzufügen, damit das Kontroll-Skript von überall aus aufgerufen werden kann
+echo "PATH=$PATH:." >> ~/.bashrc
+source ~/.bashrc # Alternativ aus- und wieder einloggen
+bpctl -h # Hilfe für das Skript anzeigen
+```
+
+## Konfiguration des Blueprints
+Nach erfolgreicher Installation können nun die Tools, die verwendet werden sollen, konfiguriert werden.
+
+```bash
+bpctl configure
 Enter an email address that will be used for letsencrypt (will receive warnings if certificates expire)
 webmaster@example.org
 Enter the client you want to activate during installation (default/school)
@@ -125,8 +134,8 @@ ILIAS configuration ready.
 
 ## Start
 ```bash
-./start
-./start
+bpctl start
+
 Starting hosted blue print...
 [*] Creating elearning docker network
 70e530ea068a303980858d6725effbce0c0dd5e916dce810b2aa366cc1c5a8a3
@@ -207,7 +216,7 @@ Das Update-Kommando aktualisiert die Images bezogen auf ihre aktuellen Versions-
 
 ```bash
 git pull # Bei Release Updates
-./update
+bpctl update
 The following operation will update all container images defined in docker-compose files of the projects. You should backup or create a VM snapshot before doing that. Do you want to start? (Y/N) y
 [*] Pulling nginx images...
 
@@ -251,7 +260,8 @@ ilias-school3exampleorg_ilias_1 is up-to-date
 Um alles vom Server wieder zu löschen kann `purge` genutzt werden. Damit wird alles gelöscht, inkl. der persistenten Daten der Docker Container. Bitte nur machen, wenn alles gesichert wurde oder noch getestet wird. Da `docker system prune` genutzt wird, kann das auch andere Daten anderer Docker-Projekte enthalten, die nicht mehr im System referenziert sind. Mit dem Kommando `backup` gesicherte Daten werden nicht gelöscht.
 
 ```
-./purge
+bpctl purge
+
 The following operation will purge your docker system to start from scratch (can include data from other docker projects, if no references exist anymore). Do you know what you do and want to start from scratch? (Y/N) y
 [*] Stopping Nginx reverse proxy...
 Stopping nginx-letsencrypt ... done
@@ -309,7 +319,7 @@ Total reclaimed space: 1.444GB
 Mithilfe des Skriptes `./backup` wird ein Backup aller Projekte angelegt.
 
 ```
-./backup
+bpctl backup
 Pausing nginx-proxy       ... done
 Pausing nginx-letsencrypt ... done
 [+] Backing up nginx project to backups/2020-03-30_16-20

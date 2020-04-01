@@ -1,4 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Current script's directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # Purge all docker data to start from scratch
 read -p "The following operation will purge your docker system to start from scratch (can include data from other docker projects, if no references exist anymore). Do you know what you do and want to start from scratch? (Y/N) " -n 1 -r
 echo
@@ -7,14 +11,14 @@ then
     ./stop
 
     # Delete Ilias environment files
-    for f in ilias/env*
+    for f in $DIR/../ilias/env*
     do
         rm $f
         echo "[*] Deleted $f"
     done
 
     # Delete nginx environment files
-    rm nginx/.nginx_proxy_env
+    rm $DIR/../nginx/.nginx_proxy_env
     echo "[*] Deleted nginx/.nginx_proxy_env"
 
     # Purge docker data

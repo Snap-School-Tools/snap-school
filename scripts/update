@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+# Current script's directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 read -p "The following operation will update all container images defined in docker-compose files of the projects. You should backup or create a VM snapshot before doing that. Do you want to start? (Y/N) " -n 1 -r
 echo
@@ -6,13 +9,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]
 then
 
     echo "[*] Pulling nginx images..."
-    docker-compose --file nginx/docker-compose.yml pull
+    docker-compose --file $DIR/../nginx/docker-compose.yml pull
 
     echo "[*] Pulling ilias images (you can ignore warning messages that variables are not set)..."
-    docker-compose --file ilias/docker-compose.yml pull
+    docker-compose --file $DIR/../ilias/docker-compose.yml pull
 
     echo "[*] Recreating containers..."
-    ./start
+    $DIR/start
 
     echo "[✓] Updated successfully"
 else
