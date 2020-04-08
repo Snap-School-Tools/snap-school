@@ -1,32 +1,35 @@
-version: "3"
+networks:
+  default:
+    external:
+      name: elearning
 services:
-  nginx-proxy:
-    image: digitallearningforschools/nginx-proxy:0.7.0
-    container_name: nginx-proxy
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - nginx-proxy-certs:/etc/nginx/certs:ro
-      - nginx-proxy-vhosts:/etc/nginx/vhost.d
-      - nginx-proxy-html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro 
-  nginx-proxy-letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion:v1.12.1
+  nginx-letsencrypt:
     container_name: nginx-letsencrypt
     depends_on:
-      - nginx-proxy
+    - nginx-proxy
+    environment:
+      DEFAULT_EMAIL: webmaster@science-site.de
+      NGINX_PROXY_CONTAINER: nginx-proxy
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.12.1
     volumes:
-      - nginx-proxy-certs:/etc/nginx/certs:rw
-      - nginx-proxy-vhosts:/etc/nginx/vhost.d
-      - nginx-proxy-html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    env_file: .nginx_proxy_env
+    - nginx-proxy-certs:/etc/nginx/certs:rw
+    - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
+    - nginx-proxy-html:/usr/share/nginx/html:rw
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+  nginx-proxy:
+    container_name: nginx-proxy
+    image: digitallearningforschools/nginx-proxy:0.7.0
+    ports:
+    - 80:80/tcp
+    - 443:443/tcp
+    volumes:
+    - nginx-proxy-certs:/etc/nginx/certs:ro
+    - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
+    - nginx-proxy-html:/usr/share/nginx/html:rw
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+version: '3.0'
 volumes:
-    nginx-proxy-certs:
-    nginx-proxy-vhosts:
-    nginx-proxy-html:
-networks:
-    default:
-        external:
-            name: elearning
+  nginx-proxy-certs: {}
+  nginx-proxy-html: {}
+  nginx-proxy-vhosts: {}
+
