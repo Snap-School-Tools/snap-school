@@ -29,7 +29,18 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.github_token }}
 
     # Shell script static code analysis
-    - name: shellcheck
-      uses: ludeeus/action-shellcheck@0.1.0
+    - name: Run shellcheck with reviewdog
+      uses: reviewdog/action-shellcheck@v1.0.0
+      with:
+        # GITHUB_TOKEN.
+        github_token: ${{ secrets.github_token }}
+        # Report level for reviewdog [info,warning,error]
+        # level: # optional, default is error
+        # Reporter of reviewdog command [github-pr-check,github-pr-review].
+        reporter: 'github-pr-review'
+        # File patterns of target files. Same as `-name [pattern]` of `find` command.
+        pattern: scripts/*
+        # Exclude patterns of target files. Same as `-not -path [exclude]` of `find` command.
+        exclude: scripts/configure
       if: always()
 
