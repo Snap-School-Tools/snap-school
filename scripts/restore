@@ -67,21 +67,39 @@ restore() {
     cd ..
 }
 
+select_and_start_backup() {
+    project_dir=$1
+    env_file=$2
+    if [ -z $env_file ]; then 
+        backup_directory=$DIR/../$project_dir/backups
+        project_name=$project_dir
+    else
+        backup_directory=$DIR/../$project_dir/backups/$env_file/
+        project_name=$project_dir/$env_file
+    fi
+    
+    echo "The following backups were found for $project_dir:"
+    for f in $backup_directory/*.tar.gz
+    do
+        echo $(readlink -f "$f")
+    done
+    read -p "Which backup do you want to restore for $project_name? (Copy/paste full path, leave empty to skip) " -r
+    if [ -z $REPLY ]; then
+        echo "Skipped restore operation for $project_name"
+    else
+        restore "$DIR/../$project_dir" $env_file $REPLY
+    fi
+}
+
 read -p "Restoring the volumes of a docker-compose project means you will need to pause and restart it. Depending on your environment it is highly recommended to create a VM snapshot to restore in case of restore errors. Are you ready to start? (Y/N) " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Starting process to restore all backups. Will restore the newest existing backup for all containers."
-    echo "The following backups were found for nginx:"
-    for f in $DIR/../nginx/backups/*.tar.gz
+    select_and_start_backup "nginx"
+    for f in ilias/env*
     do
-        echo $(readlink -f "$f")
+        select_and_start_backup "ilias" $(basename $f)
     done
-    read -p "Which backup do you want to restore for nginx? (Copy/paste full path, leave empty to skip) " -r
-    if [ -z $REPLY ]; then
-        echo "Skipped restore operation for nginx"
-    else
-        restore "$DIR/../nginx" .nginx_proxy_env $REPLY
-    fi
 else
     echo "[✗] Restore operation stopped, nothing changed."
 fi
