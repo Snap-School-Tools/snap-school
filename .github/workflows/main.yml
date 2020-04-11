@@ -28,7 +28,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
     # Shell script static code analysis
-    - name: Lint check
-      uses: azohra/shell-linter@v0.2.0
-      with:
-        path: "scripts/backup,scripts/purge,scripts/start,scripts/stop,scripts/update"
+    - name: shellcheck
+      uses: ludeeus/action-shellcheck@0.1.0
