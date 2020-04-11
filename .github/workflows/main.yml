@@ -35,7 +35,7 @@ jobs:
         # GITHUB_TOKEN.
         github_token: ${{ secrets.github_token }}
         # Report level for reviewdog [info,warning,error]
-        # level: # optional, default is error
+        level: info
         # Reporter of reviewdog command [github-pr-check,github-pr-review].
         reporter: 'github-pr-review'
         # Base directory to run shellcheck. Same as `[path]` of `find` command.
