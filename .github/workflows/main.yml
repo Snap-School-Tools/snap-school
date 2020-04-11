@@ -25,6 +25,8 @@ jobs:
       uses: wemake-services/wemake-python-styleguide@0.14.0
       with:
         # Path or space-separated list of paths to lint
-        path: bpctl scripts/configure
+        path: ./bpctl ./scripts/configure
         # How would you like the results to be displayed?
-        #reporter: # optional, default is terminal
+        reporter: 'github-pr-review'
+      env:
+        GITHUB_TOKEN: ${{ secrets.github_token }}
