@@ -38,9 +38,11 @@ jobs:
         # level: # optional, default is error
         # Reporter of reviewdog command [github-pr-check,github-pr-review].
         reporter: 'github-pr-review'
+        # Base directory to run shellcheck. Same as `[path]` of `find` command.
+        path: ./scripts
         # File patterns of target files. Same as `-name [pattern]` of `find` command.
-        pattern: scripts/*
+        pattern: '*'
         # Exclude patterns of target files. Same as `-not -path [exclude]` of `find` command.
-        exclude: scripts/configure
+        exclude: 'configure'
       if: always()
 
