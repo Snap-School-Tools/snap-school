@@ -27,6 +27,9 @@ jobs:
         reporter: 'github-pr-review'
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
+
     # Shell script static code analysis
     - name: shellcheck
       uses: ludeeus/action-shellcheck@0.1.0
+      if: always()
+
