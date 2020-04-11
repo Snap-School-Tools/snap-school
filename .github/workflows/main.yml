@@ -19,7 +19,7 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    # Runs a single command using the runners shell
+    # Python static code analysis
     - name: wemake-python-styleguide
       uses: wemake-services/wemake-python-styleguide@0.14.0
       with:
@@ -27,3 +27,8 @@ jobs:
         reporter: 'github-pr-review'
       env:
         GITHUB_TOKEN: ${{ secrets.github_token }}
+    # Shell script static code analysis
+    - name: Lint check
+      uses: azohra/shell-linter@v0.2.0
+      with:
+        path: "scripts/backup,scripts/purge,scripts/start,scripts/stop,scripts/update"
