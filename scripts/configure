@@ -1,16 +1,15 @@
 #!/usr/bin/env python3
-import shutil
 import os
-import math
-import string
 import random
 import sys
 r = random.SystemRandom()
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
+
 def generate_password(pass_len=20):
-    """Generates a password with the given length (see https://stackoverflow.com/questions/3854692/generate-password-in-python)
+    """Generates a password with the given length (see
+        https://stackoverflow.com/questions/3854692/generate-password-in-python)
     """
     symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklymnopqrstuvwxyz0123456789'
     return ''.join(r.choice(symbols) for _ in range(pass_len))
@@ -97,7 +96,8 @@ def request_configuration():
         client = 'school'
 
     ilias_domains = []
-    print('Enter all ILIAS instance\'s hostnames (one host name per line, for example ilias.my-school.com, ilias.my-school.provider.com, etc.)')
+    print('Enter all ILIAS instance\'s hostnames (one host name per line, for example ilias.my-school.com, '
+          'ilias.my-school.provider.com, etc.)')
     for ilias_domain in sys.stdin:
         if ilias_domain == '\n':
             break
