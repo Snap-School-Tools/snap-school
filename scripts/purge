@@ -8,17 +8,17 @@ read -p "The following operation will purge your docker system to start from scr
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-    $DIR/stop
+    "$DIR"/stop
 
     # Delete Ilias environment files
-    for f in $DIR/../ilias/env*
+    for f in "$DIR"/../ilias/env*
     do
-        rm $f
+        rm "$f"
         echo "[*] Deleted $f"
     done
 
     # Delete nginx environment files
-    rm $DIR/../nginx/.nginx_proxy_env
+    rm "$DIR"/../nginx/.nginx_proxy_env
     echo "[*] Deleted nginx/.nginx_proxy_env"
 
     # Purge docker data

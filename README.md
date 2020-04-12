@@ -46,7 +46,7 @@ Host            Type    MX  Destination
 
 ```bash
 # Verbinden mit SSH (bei Linux und Mac OS X mit dem verfügbaren ssh Kommando, bei Windows wird z. B. Putty verwendet)
-apt-get install python3 pyton3-pip
+apt-get install python3 python3-pip
 # Docker Installation nach Vorgabe in https://docs.docker.com/install/linux/docker-ce/ubuntu/ (zum Teil werden von Hosting-Anbietern auch Images mit vorinstalliertem Docker angeboten)
 apt-get remove docker docker-engine docker.io containerd runc
 apt-get update

@@ -5,14 +5,14 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 echo "[*] Stopping Nginx reverse proxy..."
 
-docker-compose --file $DIR/../nginx/docker-compose.yml down
+docker-compose --file "$DIR"/../nginx/docker-compose.yml down
 
 echo "[*] Stopping Ilias instances..."
 
-for f in $DIR/../ilias/env*
+for f in "$DIR"/../ilias/env*
 do
     echo "[*] Stopping docker multi-container with env-file $f"
-    docker-compose --env-file $f --file $DIR/../ilias/docker-compose.yml down
+    docker-compose --env-file "$f" --file "$DIR"/../ilias/docker-compose.yml down
 done
 
 echo "[✓] All containers in the environment stopped successfully."
