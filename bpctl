@@ -94,7 +94,13 @@ def backup(args):
 
 
 def restore(args):
-    subprocess.call(DIR_PATH + '/scripts/restore')
+    """
+    Restore snap school environment.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/restore'.format(DIR_PATH))
 
 
 def purge(args):
@@ -144,7 +150,7 @@ if __name__ == '__main__':
     stop_parser.set_defaults(func=stop)
 
     update_parser = subparsers.add_parser(
-        str(Operation.update), 
+        str(Operation.update),
         help='Updates all docker images and recreates changed containers',
         description='Updates all docker images and recreates changed containers. The update will only '
         + 'pull the latest version of the image (probably hotfixes and security update).'
@@ -159,7 +165,7 @@ if __name__ == '__main__':
         help='Creates backups for all services in the blueprint. ',
         description='Creates backups of all docker volumes, docker-compose files, env files, '
         + 'logs and container file system. The operation will pause containers during '
-        + 'the backup operation.'
+        + 'the backup operation.',
     )
     backup_parser.set_defaults(func=backup)
 
@@ -169,7 +175,7 @@ if __name__ == '__main__':
         description='Restores backups of containers. The process will stop all containers of the chosen projects, '
         + 'restore their volumes and docker-compose files and start them again. The backup '
         + 'also contains logs and the whole container file system, but they will not be '
-        + 'used in the restore process (you can restore files from these parts of the backup manually).'
+        + 'used in the restore process (you can restore files from these parts of the backup manually).',
     )
     restore_parser.set_defaults(func=restore)
 
@@ -177,7 +183,8 @@ if __name__ == '__main__':
         str(Operation.purge),
         help='Purges configuration, images, volumes but not backups of the complete environment. ',
         description='Purges configuration, images, volumes but not backups of the complete environment. '
-        + 'The purge operation can include other docker data that is not referenced anymore (calls docker system prune)'
+        + 'The purge operation can include other docker data that is not referenced anymore '
+        + '(calls docker system prune)',
     )
     purge_parser.set_defaults(func=purge)
 
