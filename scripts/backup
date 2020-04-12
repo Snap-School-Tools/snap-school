@@ -72,7 +72,7 @@ backup() {
 }
 
 backup "$DIR/../nginx"
-for f in $DIR/../ilias/env*
+for f in "$DIR"/../ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"
     backup "ilias" "--env-file $(basename "$f")" "$(basename "$f")"
