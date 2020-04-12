@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
+"""snap-school control script."""
 import argparse
-import sys
-import subprocess
 import os
+import subprocess
+import sys
 import traceback
-
 from enum import Enum
 
-DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+DIR_PATH: str = os.path.dirname(os.path.realpath(__file__))
 
 
 class HelpOnErrorParser(argparse.ArgumentParser):
+    """ArgumentParse with additional output in case of errors."""
+
     def error(self, message):
-        sys.stderr.write('error: %s\n' % message)
+        """
+        Print the help text of the argument parser in case of errors.
+
+        Args:
+            message: error message
+        """
+        sys.stderr.write('error: {0}\n'.format(message))
         self.print_help()
         sys.exit(2)
 
 
 class Operation(Enum):
-    """Enum containing all possible operations to call using bpctl
-    """
+    """Enum containing all possible operations to call using bpctl."""
+
     configure = 'configure'
     start = 'start'
     stop = 'stop'
@@ -33,23 +41,56 @@ class Operation(Enum):
 
 
 def configure(args):
-    subprocess.call(DIR_PATH + '/scripts/configure')
+    """
+    Configure snap school by setting which applications to run on which (sub) domains.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/configure'.format(DIR_PATH))
 
 
 def start(args):
-    subprocess.call(DIR_PATH + '/scripts/start')
+    """
+    Start snap school environment.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/start'.formart(DIR_PATH))
 
 
 def stop(args):
-    subprocess.call(DIR_PATH + '/scripts/stop')
+    """
+    Stop snap school environment.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/stop'.format(DIR_PATH))
 
 
 def update(args):
-    subprocess.call(DIR_PATH + '/scripts/update')
+    """
+    Update snap school environment docker containers.
+
+    For a complete update of the environment call git pull.
+    Check the release docs first and create a snaphot and/or backup.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/update'.format(DIR_PATH))
 
 
 def backup(args):
-    subprocess.call(DIR_PATH + '/scripts/backup')
+    """
+    Backup snap school environment.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/backup'.format(DIR_PATH))
 
 
 def restore(args):
@@ -57,40 +98,59 @@ def restore(args):
 
 
 def purge(args):
-    subprocess.call(DIR_PATH + '/scripts/purge')
+    """
+    Purge all files of the snap school environment.
+
+    This will delete everything but backups.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/purge'.format(DIR_PATH))
 
 
 def check_config_exists():
-    return os.path.exists(DIR_PATH + '/nginx/.nginx_proxy_env')
+    """
+    Check env file for nginx.
+
+    Returns:
+        true, if env file for nginx exists
+    """
+    return os.path.exists('{0}/nginx/.nginx_proxy_env'.format(DIR_PATH))
 
 
 if __name__ == '__main__':
-    parser = HelpOnErrorParser(
-        description='Control script to control the digital learning environment')
+    parser = HelpOnErrorParser(description='Control script to control the digital learning environment')
     subparsers = parser.add_subparsers()
     configure_parser = subparsers.add_parser(
         str(Operation.configure),
-        help='Configures the environment.',
-        description='Configures the environment. Configure tools to use and (sub) domains to install them on.')
+        help='Configures the environment. Configure tools to use and (sub) domains to install them on.',
+        description='Configures the environment',
+    )
     configure_parser.set_defaults(func=configure)
 
     start_parser = subparsers.add_parser(
-        str(Operation.start), help='Starts all docker containers',
-        description='Starts all docker containers')
+        str(Operation.start),
+        help='Starts all docker containers',
+        description='Starts all docker containers',
+    )
     start_parser.set_defaults(func=start)
 
     stop_parser = subparsers.add_parser(
-        str(Operation.stop), help='Stops all docker containers',
-        description='Stops all docker containers')
+        str(Operation.stop),
+        help='Stops all docker containers',
+        description='Stops all docker containers',
+    )
     stop_parser.set_defaults(func=stop)
 
     update_parser = subparsers.add_parser(
-        str(Operation.update), help='Updates all docker images and recreates changed containers',
+        str(Operation.update), 
+        help='Updates all docker images and recreates changed containers',
         description='Updates all docker images and recreates changed containers. The update will only '
-        'pull the latest version of the image (probably hotfixes and security update).'
-        'Release upgrades with new versions of the images will only be done if checking '
-        'out another version of the blueprint or calling git pull on the master branch '
-        'after a release.'
+        + 'pull the latest version of the image (probably hotfixes and security update).'
+        + 'Release upgrades with new versions of the images will only be done if checking '
+        + 'out another version of the blueprint or calling git pull on the master branch '
+        + 'after a release.',
     )
     update_parser.set_defaults(func=update)
 
@@ -98,50 +158,62 @@ if __name__ == '__main__':
         str(Operation.backup),
         help='Creates backups for all services in the blueprint. ',
         description='Creates backups of all docker volumes, docker-compose files, env files, '
-        'logs and container file system. The operation will pause containers during '
-        'the backup operation.')
+        + 'logs and container file system. The operation will pause containers during '
+        + 'the backup operation.'
+    )
     backup_parser.set_defaults(func=backup)
 
     restore_parser = subparsers.add_parser(
         str(Operation.restore),
         help=('Restores backups of containers.'),
         description='Restores backups of containers. The process will stop all containers of the chosen projects, '
-        'restore their volumes and docker-compose files and start them again. The backup '
-        'also contains logs and the whole container file system, but they will not be '
-        'used in the restore process (you can restore files from these parts of the backup manually).')
+        + 'restore their volumes and docker-compose files and start them again. The backup '
+        + 'also contains logs and the whole container file system, but they will not be '
+        + 'used in the restore process (you can restore files from these parts of the backup manually).'
+    )
     restore_parser.set_defaults(func=restore)
 
     purge_parser = subparsers.add_parser(
         str(Operation.purge),
         help='Purges configuration, images, volumes but not backups of the complete environment. ',
         description='Purges configuration, images, volumes but not backups of the complete environment. '
-        'The purge operation can include other docker data that is not referenced anymore (calls docker system prune)')
+        + 'The purge operation can include other docker data that is not referenced anymore (calls docker system prune)'
+    )
     purge_parser.set_defaults(func=purge)
 
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
-        print('\nCalled bpctl without operation. Printing help message.\n',
-              file=sys.stderr)
+        print(
+            '\nCalled bpctl without operation. Printing help message.\n',
+            file=sys.stderr,
+        )
         parser.print_help(sys.stderr)
     else:
         try:
-            if args.func != configure:
+            if args.func == configure:
                 if check_config_exists():
-                    args.func(args)
+                    print(
+                        "[✗] eLearning blueprint has already been configured. Call 'bpctl purge' before calling "
+                        + "'bpctl configure' again.",
+                    )
                 else:
-                    print("[✗] Please call 'bpctl configure' before calling "
-                          "operations for the eLearning blueprint")
+                    args.func(args)
+            elif check_config_exists():
+                args.func(args)
             else:
-                if check_config_exists():
-                    print("[✗] eLearning blueprint has already been configured. Call 'bpctl purge' before calling "
-                          "'bpctl configure' again.")
-                else:
-                    args.func(args)
+                print(
+                    "[✗] Please call 'bpctl configure' before calling "
+                    + 'operations for the eLearning blueprint',
+                )
         except KeyboardInterrupt:
-            print('\nThe process was stopped manually by key interrupt',
-                  file=sys.stderr)
-        except BaseException as e:
-            print('\nThe process was stopped by the following error: {0}'.format(
-                sys.exc_info()[0]), file=sys.stderr)
+            print(
+                '\nThe process was stopped manually by key interrupt',
+                file=sys.stderr,
+            )
+        except Exception:
+            print(
+                '\nThe process was stopped by the following error: {0}'.format(sys.exc_info()[0]),
+                file=sys.stderr,
+            )
             traceback.print_exc()
