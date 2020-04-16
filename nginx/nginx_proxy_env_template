@@ -1,4 +1,4 @@
 DEFAULT_EMAIL=$$EMAIL$$
 #Activate line if only test certificates should be requested
-#ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
+ACME_CA_URI=https://acme-staging-v02.api.letsencrypt.org/directory
 NGINX_PROXY_CONTAINER=nginx-proxy

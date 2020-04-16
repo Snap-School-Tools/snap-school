@@ -156,6 +156,11 @@ ILIAS configuration ready.
 ```
 
 ## Start
+
+Die Umgebung wird wie folgt gestartet.
+
+**Nach dem ersten Start *müssen* die ILIAS Root-Passwörter aus dem Logfile abgerufen und beispielsweise in einem Passwort Safe hinterlegt werden. Beim nächsten Neustart werden diese Passwörter nicht mehr angezeigt.**
+
 ```bash
 bpctl start
 
@@ -220,7 +225,8 @@ Creating ilias-school3exampleorg_ilias_1 ... done
 
 # Der erste Start kann eine ganze Weile dauern
 # Das Login-Passwort für Ilias steht im Logfile nach der ersten Installation, z. B. für school1.example.org aus dem Beispiel:
-docker-compose --file ilias/docker-compose.yml --env-file ilias/env_ilias-school1.example.org logs
+cd ilias
+docker-compose --env-file env_ilias-school1.example.org logs
 
 [...]
 ilias_1  | =======================================================
@@ -280,7 +286,7 @@ ilias-school3exampleorg_ilias_1 is up-to-date
 [✓] Updated successfully
 ```
 ## Purge / Löschen
-Um alles vom Server wieder zu löschen kann `purge` genutzt werden. Damit wird alles gelöscht, inkl. der persistenten Daten der Docker Container. Bitte nur machen, wenn alles gesichert wurde oder noch getestet wird. Da `docker system prune` genutzt wird, kann das auch andere Daten anderer Docker-Projekte enthalten, die nicht mehr im System referenziert sind. Mit dem Kommando `backup` gesicherte Daten werden nicht gelöscht.
+Um alles vom Server wieder zu löschen kann `purge` genutzt werden. Damit wird alles gelöscht, inkl. der persistenten Daten der Docker Container. Bitte nur machen, wenn alles gesichert wurde oder noch getestet wird. Da `docker system prune` genutzt wird, kann das auch Daten anderer Docker-Projekte enthalten, die nicht mehr von Docker referenziert werden. Mit dem Kommando `backup` gesicherte Daten werden nicht gelöscht.
 
 ```
 bpctl purge
@@ -435,6 +441,9 @@ Unpausing ilias-school3exampleorg_mysql_1 ... done
 # Todos
 * Anleitung / Skript für das Wiederherstellen aus dem Backup
 * Weitere Tools dem Blueprint hinzufügen (aktuelle Version beinhaltet nur ILIAS)
+
+# Test protocols
+[Backup/Restore](docs/backup_restore_test.md)
 
 # Acknowledgements
 

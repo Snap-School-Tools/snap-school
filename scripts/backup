@@ -14,34 +14,23 @@ backup() {
     project_name=$(basename "$project_dir")
     backup_time=$(date +"%Y-%m-%d_%H-%M")
     backup_dir=""
-    env_file_param=""
-    if [ -z "$env_file" ]
-    then 
-        backup_dir="backups/$backup_time"
-    else
-        backup_dir="backups/$env_file/$backup_time"
-        env_file_param="--env-file $env_file"
-    fi
+    backup_dir="backups/$env_file/$backup_time"
 
     
-    # Optionally pause the containers
-    docker-compose "$env_file_param" pause
+    # Pause the containers
+    docker-compose --env-file "$env_file" pause
 
     echo "[+] Backing up $project_name project to $backup_dir"
     mkdir -p "$backup_dir"
 
     echo "[*] Saving config to ./docker-compose.yml"
-    docker-compose "$env_file_param" config > "$backup_dir/docker-compose.yml" || exit 1
+    docker-compose --env-file "$env_file" config > "$backup_dir/docker-compose.yml" || exit 1
 
-    if [ -z "$env_file" ]; then
-        echo "No env file to backup"
-    else
-        echo "[*] Saving env file $env_file"
-        cp "$env_file" "$backup_dir/"
-    fi
+    echo "[*] Saving env file $env_file"
+    cp "$env_file" "$backup_dir/"
 
-    for service_name in $(docker-compose "$env_file_param" config --services); do
-        container_id=$(docker-compose "$env_file_param" ps -q "$service_name")
+    for service_name in $(docker-compose --env-file "$env_file" config --services); do
+        container_id=$(docker-compose --env-file "$env_file" ps -q "$service_name")
 
         service_dir="$backup_dir/$service_name"
         echo "[*] Backing up ${project_name}__${service_name} to ./$service_name..."
@@ -73,7 +62,7 @@ backup() {
             dest=${name_dest_arr[1]}
             echo "      - Working on docker volume with name '$name' and destination '$dest'"
             # Backup volume as stated in https://docs.docker.com/storage/volumes/
-            volume_dir=$(readlink -f "./$service_dir/volumes")
+            volume_dir=$(readlink -f ./"$service_dir"/volumes)
             docker run --rm --volumes-from "$container_id" -v "$volume_dir":/backup ubuntu tar cf "/backup/$name.tar" "$dest"
         done <<< "$volumes_of_container"
     done
@@ -83,12 +72,12 @@ backup() {
 
     echo "[✓] Finished Backing up $project_name to $backup_dir.tar.gz."
 
-    # Resume the containers if paused above
-    docker-compose "$env_file_param" unpause
-    cd ..
+    # Resume the containers
+    docker-compose --env-file "$env_file" unpause
+    cd "$DIR" || exit
 }
 
-backup "$DIR/../nginx"
+backup "$DIR/../nginx" .nginx_proxy_env
 for f in "$DIR"/../ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"

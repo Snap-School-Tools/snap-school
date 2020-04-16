@@ -9,8 +9,6 @@ restore() {
     env_file=$2
     backup_to_restore=$3
 
-    env_file_param="--env-file $env_file"
-
     cd "$project_dir" || exit
 
     project_name=$(basename "$project_dir")
@@ -28,15 +26,15 @@ restore() {
     tar xzf "$backup_to_restore" -C "$restore_dir"
 
     # Stop the containers
-    docker-compose "$env_file_param" pause
+    docker-compose --env-file "$env_file" pause
 
     echo "[*] Restoring config to ./docker-compose.yml"
     cp -f "$restore_dir/docker-compose.yml" .
 
     echo "[*] Restoring volumes of containers ..."
-    for service_name in $(docker-compose "$env_file_param" config --services); do
+    for service_name in $(docker-compose --env-file "$env_file" config --services); do
         echo "  [+] Working on service $service_name"
-        container_id=$(docker-compose "$env_file_param" ps -q "$service_name")
+        container_id=$(docker-compose --env-file "$env_file" ps -q "$service_name")
         
         # restore data volumes
         volumes_of_container=$(docker inspect -f '{{range .Mounts}}{{if and (eq .Type "volume") (eq .Mode "rw")}}{{println .Name .Destination}}{{end}}{{end}}' "$container_id")
@@ -63,22 +61,18 @@ restore() {
     echo "[✓] Finished restoring $project_name with env file $env_file from $backup_to_restore"
 
     # Resume the containers if paused above
-    docker-compose "$env_file_param" restart
-    cd ..
+    docker-compose --env-file "$env_file" restart
+    cd "$DIR" || exit
 }
 
 select_and_start_backup() {
     project_dir=$1
     env_file=$2
-    if [ -z "$env_file" ]; then 
-        backup_directory=$DIR/../$project_dir/backups
-        project_name=$project_dir
-    else
-        backup_directory=$DIR/../$project_dir/backups/$env_file/
-        project_name=$project_dir/$env_file
-    fi
+    backup_directory=$DIR/../$project_dir/backups/$env_file/
+    project_name=$project_dir/$env_file
+
     
-    echo "The following backups were found for $project_dir:"
+    echo "The following backups were found for $project_name:"
     for f in "$backup_directory"/*.tar.gz
     do
         real_path=$(readlink -f "$f")
@@ -96,10 +90,12 @@ read -p "Restoring the volumes of a docker-compose project means you will need t
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "Starting process to restore all backups. Will restore the newest existing backup for all containers."
-    select_and_start_backup "nginx"
+    select_and_start_backup "nginx" .nginx_proxy_env
     for f in ilias/env*
     do
-        select_and_start_backup "ilias" "$(basename "$f")"
+        filename=$(basename "$f")
+        echo select_and_start_backup "ilias" "$filename"
+        select_and_start_backup "ilias" "$filename"
     done
 else
     echo "[✗] Restore operation stopped, nothing changed."
