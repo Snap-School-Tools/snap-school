@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+
+# Current script's directory
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# Fully restore a docker-compose project, including named and unnamed volumes, container filesystems, config, logs. 
+restore() {
+    project_dir=$1
+    env_file=$2
+    backup_to_restore=$3
+
+    cd "$project_dir" || exit
+
+    project_name=$(basename "$project_dir")
+
+    restore_time=$(date +"%Y-%m-%d_%H-%M")
+    restore_dir=""
+
+    # If env_file was provided there can be more than one instance
+    if [ -z "$env_file" ]; then restore_dir="restore/$restore_time"; else restore_dir="restore/$env_file/$restore_time"; fi
+    
+    echo "[*] Restoring $project_name project with env file $env_file from backup $backup_to_restore"
+
+    # Unzip the backup content
+    mkdir -p "$restore_dir"
+    tar xzf "$backup_to_restore" -C "$restore_dir"
+
+    # Stop the containers
+    docker-compose --env-file "$env_file" pause
+
+    echo "[*] Restoring config to ./docker-compose.yml"
+    cp -f "$restore_dir/docker-compose.yml" .
+
+    echo "[*] Restoring volumes of containers ..."
+    for service_name in $(docker-compose --env-file "$env_file" config --services); do
+        echo "  [+] Working on service $service_name"
+        container_id=$(docker-compose --env-file "$env_file" ps -q "$service_name")
+        
+        # restore data volumes
+        volumes_of_container=$(docker inspect -f '{{range .Mounts}}{{if and (eq .Type "volume") (eq .Mode "rw")}}{{println .Name .Destination}}{{end}}{{end}}' "$container_id")
+        echo "=== VOLUMES TO RESTORE FOR SERVICE $service_name ==="
+        echo "$volumes_of_container"
+        echo "===================================================="
+
+        while read -r name_dest
+        do
+            IFS=' ' read -ra name_dest_arr <<< "$name_dest"
+            name=${name_dest_arr[0]}
+            dest=${name_dest_arr[1]}
+            volume_restore_dir=$(readlink -f "$restore_dir/$service_name/volumes")
+            # Restore as stated in https://docs.docker.com/storage/volumes/
+            echo "    [+] Restoring volume '$name' from $volume_restore_dir/$name.tar to $dest"
+            docker run --rm --volumes-from "$container_id" -v "$volume_restore_dir":/backup debian /bin/bash -c "ls -ahl $dest/; rm -R $dest/*; tar xf /backup/$name.tar; ls -ahl $dest/"
+        done <<< "$volumes_of_container"
+
+    done
+
+    echo "[*] Removing restore folder $restore_dir"
+    echo rm -R "$restore_dir"
+
+    echo "[✓] Finished restoring $project_name with env file $env_file from $backup_to_restore"
+
+    # Resume the containers if paused above
+    docker-compose --env-file "$env_file" restart
+    cd "$DIR" || exit
+}
+
+select_and_start_backup() {
+    project_dir=$1
+    env_file=$2
+    backup_directory=$DIR/../$project_dir/backups/$env_file/
+    project_name=$project_dir/$env_file
+
+    
+    echo "The following backups were found for $project_name:"
+    for f in "$backup_directory"/*.tar.gz
+    do
+        real_path=$(readlink -f "$f")
+        echo "$real_path"
+    done
+    read -p "Which backup do you want to restore for $project_name? (Copy/paste full path, leave empty to skip) " -r
+    if [ -z "$REPLY" ]; then
+        echo "Skipped restore operation for $project_name"
+    else
+        restore "$DIR/../$project_dir" "$env_file" "$REPLY"
+    fi
+}
+
+read -p "Restoring the volumes of a docker-compose project means you will need to pause and restart it. Depending on your environment it is highly recommended to create a VM snapshot to restore in case of restore errors. Are you ready to start? (Y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "Starting process to restore all backups. Will restore the newest existing backup for all containers."
+    select_and_start_backup "nginx" .nginx_proxy_env
+    for f in ilias/env*
+    do
+        filename=$(basename "$f")
+        echo select_and_start_backup "ilias" "$filename"
+        select_and_start_backup "ilias" "$filename"
+    done
+else
+    echo "[✗] Restore operation stopped, nothing changed."
+fi

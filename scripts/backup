@@ -2,41 +2,35 @@
 # Based on Docker gist https://gist.github.com/pirate/265e19a8a768a48cf12834ec87fb0eed of Github User "pirate" (Nick Sweeting)
 
 # Current script's directory
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" || exit >/dev/null 2>&1 && pwd )"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# Fully backup a docker-compose project, including all images, named and unnamed volumes, container filesystems, config, logs, and databases. 
+# Fully backup a docker-compose project, including named and unnamed volumes, container filesystems, config and logs. 
 backup() {
     project_dir=$1
-    env_file_param=$2
-    env_file=$3
+    env_file=$2
 
     cd "$project_dir" || exit
 
     project_name=$(basename "$project_dir")
     backup_time=$(date +"%Y-%m-%d_%H-%M")
     backup_dir=""
-    if [ -z "$env_file" ]; then backup_dir="backups/$backup_time"; else backup_dir="backups/$env_file/$backup_time"; fi
+    backup_dir="backups/$env_file/$backup_time"
+
     
-
-    # Optionally pause the containers
-    docker-compose "$env_file_param" pause
-
+    # Pause the containers
+    docker-compose --env-file "$env_file" pause
 
     echo "[+] Backing up $project_name project to $backup_dir"
     mkdir -p "$backup_dir"
 
-    echo "    - Saving config to ./docker-compose.yml"
-    docker-compose "$env_file_param" config > "$backup_dir/docker-compose.yml" || exit 1
+    echo "[*] Saving config to ./docker-compose.yml"
+    docker-compose --env-file "$env_file" config > "$backup_dir/docker-compose.yml" || exit 1
 
+    echo "[*] Saving env file $env_file"
+    cp "$env_file" "$backup_dir/"
 
-    # save database dump files
-    echo "    - Saving database dumps to ./dumps"
-    mkdir -p "$backup_dir/dumps"
-    # your database/stateful service export commands go here, e.g.
-    # docker-compose exec postgresql env PGPASSWORD="$POSTGRES_PASSWORD" pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" | gzip -9 > "$backup_dir/dumps/$POSTGRES_DB.sql.gz"
-
-    for service_name in $(docker-compose "$env_file_param" config --services); do
-        container_id=$(docker-compose "$env_file_param" ps -q "$service_name")
+    for service_name in $(docker-compose --env-file "$env_file" config --services); do
+        container_id=$(docker-compose --env-file "$env_file" ps -q "$service_name")
 
         service_dir="$backup_dir/$service_name"
         echo "[*] Backing up ${project_name}__${service_name} to ./$service_name..."
@@ -51,29 +45,41 @@ backup() {
         docker logs "$container_id" > "$service_dir/docker.out" 2> "$service_dir/docker.err"
 
         # save data volumes
-        mkdir -p "$service_dir/volumes"
-        for source in $(docker inspect -f '{{range .Mounts}}{{println .Source}}{{end}}' "$container_id"); do
-            volume_dir="$service_dir/volumes$source"
-            echo "    - Saving $source volume to ./$service_name/volumes$source"
-            mkdir -p "$(dirname "$volume_dir")"
-            cp -a -r "$source" "$volume_dir"
-        done
+        volume_dir="$service_dir/volumes"
+        mkdir -p "$volume_dir"
 
+        # list of volume names and destination in the container
+        volumes_of_container=$(docker inspect -f '{{range .Mounts}}{{if eq .Type "volume"}}{{println .Name .Destination}}{{end}}{{end}}' "$container_id")
+        echo "=== VOLUMES TO BACKUP FOR SERVICE $service_name ==="
+        echo "$volumes_of_container"
+        echo "==================================================="
+        # iterate over the volumes_of_container list (per line)
+        while read -r name_dest
+        do
+            # split name and destination (seperated by space)
+            IFS=" " read -ra name_dest_arr <<< "$name_dest"
+            name=${name_dest_arr[0]}
+            dest=${name_dest_arr[1]}
+            echo "      - Working on docker volume with name '$name' and destination '$dest'"
+            # Backup volume as stated in https://docs.docker.com/storage/volumes/
+            volume_dir=$(readlink -f ./"$service_dir"/volumes)
+            docker run --rm --volumes-from "$container_id" -v "$volume_dir":/backup ubuntu tar cf "/backup/$name.tar" "$dest"
+        done <<< "$volumes_of_container"
     done
 
     echo "[*] Compressing backup folder to $backup_dir.tar.gz"
-    tar -zcf "$backup_dir.tar.gz" --totals "$backup_dir" && rm -Rf "$backup_dir"
+    tar -zcf "$backup_dir.tar.gz" -C "$backup_dir" --totals "." && rm -Rf "$backup_dir"
 
     echo "[✓] Finished Backing up $project_name to $backup_dir.tar.gz."
 
-    # Resume the containers if paused above
-    docker-compose "$env_file_param" unpause
-    cd ..
+    # Resume the containers
+    docker-compose --env-file "$env_file" unpause
+    cd "$DIR" || exit
 }
 
-backup "$DIR/../nginx"
+backup "$DIR/../nginx" .nginx_proxy_env
 for f in "$DIR"/../ilias/env*
 do
     echo "Backing up docker-compose project with env_file $f"
-    backup "ilias" "--env-file $(basename "$f")" "$(basename "$f")"
+    backup "ilias" "$(basename "$f")"
 done

@@ -7,7 +7,7 @@ import sys
 import traceback
 from enum import Enum
 
-DIR_PATH: str = os.path.dirname(os.path.realpath(__file__))
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class HelpOnErrorParser(argparse.ArgumentParser):
@@ -33,6 +33,7 @@ class Operation(Enum):
     stop = 'stop'
     update = 'update'
     backup = 'backup'
+    restore = 'restore'
     purge = 'purge'
 
     def __str__(self):
@@ -56,7 +57,7 @@ def start(args):
     Args:
         args: arguments of the argument parser
     """
-    subprocess.call('{0}/scripts/start'.formart(DIR_PATH))
+    subprocess.call('{0}/scripts/start'.format(DIR_PATH))
 
 
 def stop(args):
@@ -90,6 +91,16 @@ def backup(args):
         args: arguments of the argument parser
     """
     subprocess.call('{0}/scripts/backup'.format(DIR_PATH))
+
+
+def restore(args):
+    """
+    Restore snap school environment.
+
+    Args:
+        args: arguments of the argument parser
+    """
+    subprocess.call('{0}/scripts/restore'.format(DIR_PATH))
 
 
 def purge(args):
@@ -141,24 +152,39 @@ if __name__ == '__main__':
     update_parser = subparsers.add_parser(
         str(Operation.update),
         help='Updates all docker images and recreates changed containers',
-        description='Updates all docker images and recreates changed containers',
+        description='Updates all docker images and recreates changed containers. The update will only '
+        + 'pull the latest version of the image (probably hotfixes and security update).'
+        + 'Release upgrades with new versions of the images will only be done if checking '
+        + 'out another version of the blueprint or calling git pull on the master branch '
+        + 'after a release.',
     )
     update_parser.set_defaults(func=update)
 
     backup_parser = subparsers.add_parser(
         str(Operation.backup),
-        help='Creates backups of all docker volumes and recreates changed containers. '
-        + 'Will pause containers during backup operation.',
-        description='Creates backups of all docker volumes and recreates changed containers.',
+        help='Creates backups for all services in the blueprint. ',
+        description='Creates backups of all docker volumes, docker-compose files, env files, '
+        + 'logs and container file system. The operation will pause containers during '
+        + 'the backup operation.',
     )
     backup_parser.set_defaults(func=backup)
 
+    restore_parser = subparsers.add_parser(
+        str(Operation.restore),
+        help=('Restores backups of containers.'),
+        description='Restores backups of containers. The process will stop all containers of the chosen projects, '
+        + 'restore their volumes and docker-compose files and start them again. The backup '
+        + 'also contains logs and the whole container file system, but they will not be '
+        + 'used in the restore process (you can restore files from these parts of the backup manually).',
+    )
+    restore_parser.set_defaults(func=restore)
+
     purge_parser = subparsers.add_parser(
         str(Operation.purge),
-        help='Purges configuration, images, volumes but not backups of the complete environment. '
-        + 'Purge operation can include other docker data that is not referenced anymore '
+        help='Purges configuration, images, volumes but not backups of the complete environment. ',
+        description='Purges configuration, images, volumes but not backups of the complete environment. '
+        + 'The purge operation can include other docker data that is not referenced anymore '
         + '(calls docker system prune)',
-        description='Purges configuration, images, volumes but not backups of the complete environment. ',
     )
     purge_parser.set_defaults(func=purge)
 
