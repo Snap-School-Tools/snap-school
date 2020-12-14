@@ -122,7 +122,7 @@ def check_config_exists():
     Returns:
         true, if env file for nginx exists
     """
-    return os.path.exists('{0}/nginx/.nginx_proxy_env'.format(DIR_PATH))
+    return os.path.exists('{0}/nginx/.env'.format(DIR_PATH))
 
 
 if __name__ == '__main__':

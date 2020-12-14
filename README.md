@@ -18,7 +18,7 @@ Im Fall von Matrix Chat kann je Server nur eine Domäne betrieben werden. Wenn a
 ## Anleitung
 ## Voraussetzungen
 * Bereitstellung eines (virtuellen) Servers (z. B. über einen Anbieter oder unter Nutzung eigener Infrastruktur in der Schule)
-    * Betriebssystem z. B. Debian oder Ubuntu (Blueprint getestet mit Ubuntu 16.04)
+    * Betriebssystem z. B. Debian oder Ubuntu (Blueprint getestet mit Ubuntu 16.04 und Debian 10 "Buster")
     * Root-Zugang wird benötigt
     * Server muss je nach Anzahl SchülerInnen und LehrerInnen unterschiedlich dimensioniert werden (nicht Teil dieser Anleitung)
 
@@ -56,16 +56,26 @@ apt-get install \
     curl \
     gnupg-agent \
     software-properties-common
+# Ubuntu
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 # Fingerprint Check (siehe Docker Doku)
 add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
    stable"
+# Debian
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+# Fingerprint Check (siehe Docker Doku)
+add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/debian \
+   $(lsb_release -cs) \
+   stable"
+
+# Ab hier unterscheidet sich das Vorgehen zwischen Ubuntu oder Debian nicht mehr
 apt-get update
 apt-get install docker-ce docker-ce-cli containerd.io
 # Installation von docker-compose nach Vorgabe in https://docs.docker.com/compose/install/
-curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+curl -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 # Sicherstellen, dass auf dem Server kein weiterer Webserver läuft (das Projekt beinhaltet einen Nginx Reverse Proxy und benötigt freie Ports 80 und 443)
 apt-get remove nginx apache2
@@ -93,10 +103,10 @@ Die im Folgenden dargestellten Schritte müssen mit einem für Docker berechtigt
 
 ```bash
 cd /srv #Dieses Verzeichnis kann frei gewählt werden und ist nur ein Vorschlag (bitte Befehle entsprechend anpassen, wenn in ein anderes Verzeichnis installiert wird)
-git clone https://github.com/Digital-Learning-fur-Schuler/hosted-blueprint.git
-cd hosted-blueprint
+git clone https://github.com/Snap-School-Tools/snap-school.git
+cd snap-school
 # Pfad zur PATH-Variable hinzufügen, damit das Kontroll-Skript von überall aus aufgerufen werden kann
-echo "PATH=$PATH:." >> ~/.bashrc
+echo "export PATH=\$PATH:/srv/snap-school" >> ~/.bashrc
 source ~/.bashrc # Alternativ aus- und wieder einloggen
 bpctl -h # Hilfe für das Skript anzeigen
 usage: bpctl [-h] {configure,start,stop,update,backup,purge} ...
