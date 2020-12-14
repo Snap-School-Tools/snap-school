@@ -6,28 +6,28 @@ services:
   nginx-letsencrypt:
     container_name: nginx-letsencrypt
     depends_on:
-    - nginx-proxy
+      - nginx-proxy
     environment:
       - DEFAULT_EMAIL
       - NGINX_PROXY_CONTAINER
       - ACME_CA_URI
     image: jrcs/letsencrypt-nginx-proxy-companion:v1.13.1
     volumes:
-    - nginx-proxy-certs:/etc/nginx/certs:rw
-    - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
-    - nginx-proxy-html:/usr/share/nginx/html:rw
-    - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx-proxy-certs:/etc/nginx/certs:rw
+      - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
+      - nginx-proxy-html:/usr/share/nginx/html:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
   nginx-proxy:
     container_name: nginx-proxy
     image: jwilder/nginx-proxy:0.8.0
     ports:
-    - 80:80/tcp
-    - 443:443/tcp
+      - 80:80/tcp
+      - 443:443/tcp
     volumes:
-    - nginx-proxy-certs:/etc/nginx/certs:ro
-    - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
-    - nginx-proxy-html:/usr/share/nginx/html:rw
-    - /var/run/docker.sock:/tmp/docker.sock:ro
+      - nginx-proxy-certs:/etc/nginx/certs:ro
+      - nginx-proxy-vhosts:/etc/nginx/vhost.d:rw
+      - nginx-proxy-html:/usr/share/nginx/html:rw
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 version: '3.0'
 volumes:
   nginx-proxy-certs: {}

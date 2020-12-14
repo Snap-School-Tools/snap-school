@@ -52,7 +52,7 @@ def generate_nginx_configuration(email):
     print('Nginx-proxy configuration is being generated')
     nginx_email_variable = '$$EMAIL$$'
     nginx_env_template = '{0}/../nginx/nginx_proxy_env_template'.format(DIR_PATH)
-    nginx_env = '{0}/../nginx/.nginx_proxy_env'.format(DIR_PATH)
+    nginx_env = '{0}/../nginx/.env'.format(DIR_PATH)
 
     replace_patterns = [
         {'key': nginx_email_variable, 'value': email},
